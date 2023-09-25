@@ -1,0 +1,11 @@
+[package]
+name = "wei-build"
+version = "0.1.0"
+edition = "2021"
+
+description = "wei build"
+documentation = "https://github.com/zuiyue-com/wei-build"
+homepage = "https://github.com/zuiyue-com/wei-build"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
