@@ -317,7 +317,6 @@ fn copy_files<P: AsRef<Path>>(from: P, to: P) -> io::Result<()> {
     Ok(())
 }
 
-
 use std::fs::{File};
 use std::io::{Write, Read};
 use sha2::{Sha256, Digest};
@@ -331,7 +330,6 @@ fn calculate_sha256<P: AsRef<Path>>(file_path: P) -> io::Result<String> {
     let hash = hasher.finalize();
     Ok(format!("{:x}", hash))
 }
-
 
 fn write_checksums<P: AsRef<Path>>(dir: P
     , checksum_file: &mut File, prefix: &Path) -> io::Result<()> {
