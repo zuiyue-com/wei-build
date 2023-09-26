@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     match command {
-        "run" => {
+        "build" => {
             let mut product_name = "wei";
             if args.len() >= 3 {
                 product_name = &args[2];
@@ -143,10 +143,10 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             let name = k.as_str().unwrap();
             println!("build: {}", name);
 
-            let mut cmd = std::process::Command::new("git");
-            cmd.arg("pull");
-            cmd.current_dir(format!("../{}", name));
-            cmd.output().unwrap();
+            // let mut cmd = std::process::Command::new("git");
+            // cmd.arg("pull");
+            // cmd.current_dir(format!("../{}", name));
+            // cmd.output().unwrap();
 
             let mut cmd = std::process::Command::new("cargo");
             cmd.arg("build");
@@ -158,7 +158,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 "windows" => ".exe",
                 _ => ""
             };
-            let src = format!("../{}/target/release/{}{}", name, name, suffix.clone());
+            let src = format!("../{}/target/debug/{}{}", name, name, suffix.clone());
             let dest_file = format!("{}{}{}", release_path, v.as_str().unwrap(), suffix);
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
