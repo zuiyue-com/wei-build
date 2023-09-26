@@ -143,11 +143,6 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             let name = k.as_str().unwrap();
             println!("build: {}", name);
 
-            // let mut cmd = std::process::Command::new("git");
-            // cmd.arg("pull");
-            // cmd.current_dir(format!("../{}", name));
-            // cmd.output().unwrap();
-
             let mut cmd = std::process::Command::new("cargo");
             cmd.arg("build");
             // cmd.arg("--release");
