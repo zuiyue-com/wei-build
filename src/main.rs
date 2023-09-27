@@ -64,7 +64,7 @@ async fn test(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 "windows" => ".exe",
                 _ => ""
             };
-            let src = format!("../{}/target/debug/{}{}", name, name, suffix.clone());
+            let src = format!("../{}/target/release/{}{}", name, name, suffix.clone());
             
             let output = std::process::Command::new("../wei-release/windows/virustotal/vt.exe")
                 .arg("scan")
@@ -85,8 +85,6 @@ async fn test(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    
-
     Ok(())
 }
 
@@ -98,7 +96,7 @@ fn help() {
 }
 
 async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let response = reqwest::get("https://gitea.com/XIU2/TrackersListCollection/raw/branch/master/all.txt").await?;
+    let response = reqwest::get("https://cdn.jsdelivr.net/gh/ngosang/trackerslist@master/trackers_all.txt").await?;
     let trackers = response.text().await?;
 
     let os = match std::env::consts::OS {
@@ -122,6 +120,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let release_path = format!("../wei-release/{}/{}/{}/", product_name.clone(), os.clone(), version.clone());
     let release_data_path = format!("{}data/", release_path);
+    let release_os_path = format!("../wei-release/{}/{}/", product_name.clone(), os.clone());
     
     println!("version:{}", version);
     let src = version_path;
@@ -142,19 +141,28 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         for (k, v) in m {
             let name = k.as_str().unwrap();
             println!("build: {}", name);
-
-            let mut cmd = std::process::Command::new("cargo");
-            cmd.arg("build");
-            // cmd.arg("--release");
-            cmd.current_dir(format!("../{}", name));
-            cmd.output().unwrap();
-
             let suffix = match os {
                 "windows" => ".exe",
                 _ => ""
             };
-            let src = format!("../{}/target/debug/{}{}", name, name, suffix.clone());
+
+            // 先检测 product/windows/wei-updater.exe 是否存在，如果存在则不再编译,复制wei-updater.exe到 product/windows/version/data/wei-updater.exe
+            let src = format!("{}stable/{}{}", release_os_path.clone(), name, suffix.clone());
             let dest_file = format!("{}{}{}", release_path, v.as_str().unwrap(), suffix);
+            
+            if Path::new(&src).exists() {
+                println!("copy: {} -> {}", src, dest_file);
+                fs::copy(src, &dest_file).unwrap();
+                continue;
+            }
+            
+            let mut cmd = std::process::Command::new("cargo");
+            cmd.arg("build");
+            cmd.arg("--release");
+            cmd.current_dir(format!("../{}", name));
+            cmd.output().unwrap();
+
+            let src = format!("../{}/target/release/{}{}", name, name, suffix.clone());
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
         }
