@@ -169,7 +169,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 如果../wei-ui-vue文件件存在，则打包wei-ui-vue
-    if Path::new("../wei-ui-vue").exists() {
+    if !Path::new("../wei-ui-vue/dist").exists() {
         let mut cmd = std::process::Command::new("git");
         cmd.arg("pull");
         cmd.current_dir("../wei-ui-vue");
@@ -180,11 +180,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         cmd.arg("build");
         cmd.current_dir("../wei-ui-vue");
         cmd.output().unwrap();
-
-        let src = "../wei-ui-vue/dist";
-        let dest_file = format!("{}dist", release_data_path.clone());
-        copy_files(src, &dest_file).expect("Failed to copy files");
     }
+
+    let src = "../wei-ui-vue/dist";
+    let dest_file = format!("{}dist", release_data_path.clone());
+    copy_files(src, &dest_file).expect("Failed to copy files");
     
     // copy wei.ico
     std::fs::copy(
