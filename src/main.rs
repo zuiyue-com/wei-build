@@ -247,6 +247,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let from = release_path.clone();
     let to = format!("../wei-release/{}/{}/latest", product_name.clone(), os.clone());
+    fs::remove_dir_all(to.clone()).expect("Failed to remove dir");
     copy_files(from, to).expect("Failed to copy files");
 
     // make torrent
