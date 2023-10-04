@@ -186,19 +186,26 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let dest_file = format!("{}dist", release_data_path.clone());
     copy_files(src, &dest_file).expect("Failed to copy files");
     
-    // copy wei.ico
     std::fs::copy(
         format!("../wei/res/wei.ico"),
         format!("{}wei.ico", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    // copy wei.ico
     std::fs::copy(
         format!("../wei/res/wei.png"),
         format!("{}wei.png", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    // copy daemon.dat
+    std::fs::copy(
+        format!("../wei-daemon/wei-daemon.ps1"),
+        format!("{}wei-daemon.ps1", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    std::fs::copy(
+        format!("../wei-daemon/wei-daemon-close.ps1"),
+        format!("{}wei-daemon-close.ps1", release_data_path.clone())
+    ).expect("Failed to copy files");
+
     std::fs::copy(
         format!("{}daemon.dat", config_path),
         format!("{}daemon.dat", release_data_path.clone())
@@ -214,25 +221,21 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}product.dat", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    // copy daemon.dat
     std::fs::copy(
         format!("{}build.dat", config_path),
         format!("{}build.dat", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    // copy daemon.dat
     std::fs::copy(
         format!("{}kill.dat", config_path),
         format!("{}kill.dat", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    // copy qbittorrent
     copy_files(
         format!("../wei-release/{}/qbittorrent", os.clone()),
         format!("{}qbittorrent", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    // copy dist to wei-ui/dist
     copy_files(
         format!("{}dist", release_data_path.clone()),
         format!("../wei-ui/dist")
