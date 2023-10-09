@@ -64,7 +64,7 @@ async fn test(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 "windows" => ".exe",
                 _ => ""
             };
-            let src = format!("../{}/target/release/{}{}", name, name, suffix.clone());
+            let src = format!("../{}/target/debug/{}{}", name, name, suffix);
             
             let output = std::process::Command::new("../wei-release/windows/virustotal/vt.exe")
                 .arg("scan")
@@ -118,9 +118,9 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let version = fs::read_to_string(&version_path).expect("Something went wrong reading the file");
     let version = version.trim();
 
-    let release_path = format!("../wei-release/{}/{}/{}/", product_name.clone(), os.clone(), version.clone());
+    let release_path = format!("../wei-release/{}/{}/{}/", product_name, os, version);
     let release_data_path = format!("{}data/", release_path);
-    let release_os_path = format!("../wei-release/{}/{}/", product_name.clone(), os.clone());
+    let release_os_path = format!("../wei-release/{}/{}/", product_name, os);
     
     println!("version:{}", version);
     let src = version_path;
@@ -147,7 +147,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             };
 
             // 先检测 product/windows/wei-updater.exe 是否存在，如果存在则不再编译,复制wei-updater.exe到 product/windows/version/data/wei-updater.exe
-            let src = format!("{}stable/{}{}", release_os_path.clone(), name, suffix.clone());
+            let src = format!("{}stable/{}{}", release_os_path.clone(), name, suffix);
             let dest_file = format!("{}{}{}", release_path, v.as_str().unwrap(), suffix);
             
             if Path::new(&src).exists() {
@@ -158,11 +158,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             
             let mut cmd = std::process::Command::new("cargo");
             cmd.arg("build");
-            cmd.arg("--release");
+            // cmd.arg("--release");
             cmd.current_dir(format!("../{}", name));
             cmd.output().unwrap();
 
-            let src = format!("../{}/target/release/{}{}", name, name, suffix.clone());
+            let src = format!("../{}/target/debug/{}{}", name, name, suffix);
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
         }
@@ -237,7 +237,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");
 
     copy_files(
-        format!("../wei-release/{}/qbittorrent", os.clone()),
+        format!("../wei-release/{}/qbittorrent", os),
         format!("{}qbittorrent", release_data_path.clone())
     ).expect("Failed to copy files");
 
@@ -251,14 +251,14 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     write_checksums(&checksum_dir, &mut checksum_file, &checksum_dir).expect("Failed to write checksums");
 
     let from = release_path.clone();
-    let to = format!("../wei-release/{}/{}/latest", product_name.clone(), os.clone());
+    let to = format!("../wei-release/{}/{}/latest", product_name, os);
     fs::remove_dir_all(to.clone()).expect("Failed to remove dir");
     copy_files(from, to).expect("Failed to copy files");
 
     // make torrent
     let mut cmd = std::process::Command::new("../wei-release/windows/transmission/transmission-create");
     cmd.arg("-o");
-    cmd.arg(format!("../wei-release/{}/{}/{}.torrent", product_name.clone(), os.clone(), version.clone()));
+    cmd.arg(format!("../wei-release/{}/{}/{}.torrent", product_name, os, version));
     trackers.lines().filter(|line| !line.trim().is_empty()).for_each(|tracker| {
         cmd.arg("-t");
         cmd.arg(tracker.trim());
@@ -267,7 +267,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("8192");
     cmd.arg(release_path.clone());
     cmd.arg("-c");
-    cmd.arg(version.clone());
+    cmd.arg(version);
     cmd.current_dir("../wei-release");
     let output = cmd.output().unwrap();
     println!("status: {}", output.status);
