@@ -207,6 +207,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");
 
     std::fs::copy(
+        format!("../wei-updater/wei-updater.ps1"),
+        format!("{}wei-updater.ps1", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    std::fs::copy(
         format!("{}daemon.dat", config_path),
         format!("{}daemon.dat", release_data_path.clone())
     ).expect("Failed to copy files");
