@@ -2,8 +2,6 @@ wei: wei
 wei-qbittorrent: data/wei-qbittorrent
 wei-ui: data/wei-ui
 wei-updater: data/wei-updater
-wei-tray: data/wei-tray
 
-wei-server: data/wei-server
 wei-task: data/wei-task
 wei-sd: data/wei-sd

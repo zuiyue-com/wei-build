@@ -217,6 +217,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");
 
     std::fs::copy(
+        format!("../wei-ui/Webview2.exe"),
+        format!("{}Webview2.exe", release_data_path.clone())
+    ).expect("Failed to copy files");    
+
+    std::fs::copy(
         format!("{}daemon.dat", config_path),
         format!("{}daemon.dat", release_data_path.clone())
     ).expect("Failed to copy files");
@@ -257,7 +262,8 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let from = release_path.clone();
     let to = format!("../wei-release/{}/{}/latest", product_name, os);
-    fs::remove_dir_all(to.clone()).expect("Failed to remove dir");
+    fs::create_dir_all(to.clone())?;
+    fs::remove_dir_all(to.clone())?;
     copy_files(from, to).expect("Failed to copy files");
 
     // make torrent
