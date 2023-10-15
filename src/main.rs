@@ -64,7 +64,7 @@ async fn test(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 "windows" => ".exe",
                 _ => ""
             };
-            let src = format!("../{}/target/debug/{}{}", name, name, suffix);
+            let src = format!("../{}/target/release/{}{}", name, name, suffix);
             
             let output = std::process::Command::new("../wei-release/windows/virustotal/vt.exe")
                 .arg("scan")
@@ -158,11 +158,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             
             let mut cmd = std::process::Command::new("cargo");
             cmd.arg("build");
-            // cmd.arg("--release");
+            cmd.arg("--release");
             cmd.current_dir(format!("../{}", name));
             cmd.output().unwrap();
 
-            let src = format!("../{}/target/debug/{}{}", name, name, suffix);
+            let src = format!("../{}/target/release/{}{}", name, name, suffix);
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
         }
