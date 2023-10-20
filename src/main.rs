@@ -227,6 +227,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");
 
     std::fs::copy(
+        format!("{}api.dat", config_path),
+        format!("{}api.dat", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    std::fs::copy(
         format!("{}download.dat", config_path),
         format!("{}download.dat", release_data_path.clone())
     ).expect("Failed to copy files");
