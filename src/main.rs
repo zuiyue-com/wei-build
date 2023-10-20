@@ -162,6 +162,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             cmd.current_dir(format!("../{}", name));
             cmd.output().unwrap();
 
+            if !cmd.status().unwrap().success() {
+                println!("build error!");
+                return Ok(());
+            }
+
             let src = format!("../{}/target/release/{}{}", name, name, suffix);
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
