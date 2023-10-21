@@ -28,6 +28,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             test(&product_name).await?;
         }
+        "clear" => {
+            git_clear();
+        }
         _ => {
             help();
         }
@@ -290,26 +293,29 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
     
-    // git update
-    let mut cmd = std::process::Command::new("git");
-    cmd.arg("add");
-    cmd.arg("*");
-    cmd.current_dir("../wei-release");
-    cmd.output().unwrap();
-
-    let mut cmd = std::process::Command::new("git");
-    cmd.arg("commit");
-    cmd.arg("-am");
-    cmd.arg(version);
-    cmd.current_dir("../wei-release");
-    cmd.output().unwrap();
-
-    let mut cmd = std::process::Command::new("git");
-    cmd.arg("push");
-    cmd.current_dir("../wei-release");
-    cmd.output().unwrap();
+    git_command(&["git", "commit", "-am", version]);
+    git_command(&["git", "push"]);
 
     Ok(())
+}
+
+fn git_clear() {
+    git_command(&["checkout", "--orphan", "latest_branch"]);
+    git_command(&["add", "-A"]);
+    git_command(&["commit", "-am", "初始化仓库"]);
+    git_command(&["branch", "-D", "main"]);
+    git_command(&["branch", "-m", "main"]);
+    git_command(&["gc", "--prune=now"]);
+    git_command(&["push", "-f", "origin", "main"]);
+}
+
+fn git_command(args: &[&str]) {
+    let mut cmd = std::process::Command::new("git");
+    cmd.args(args);
+    cmd.current_dir("../wei-release");
+    cmd.output().unwrap();
+
+    println!("{:?}", cmd);
 }
 
 
