@@ -340,7 +340,7 @@ fn copy_files<P: AsRef<Path>>(from: P, to: P) -> io::Result<()> {
             match fs::copy(&path, to.join(path.file_name().unwrap())) {
                 Ok(_) => {},
                 Err(e) => {
-                    println!("copy file error: {}", e);                    
+                    println!("copy {:?} error: {}", path, e);                    
                 }
             }
         } else if path.is_dir() {
