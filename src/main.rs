@@ -176,15 +176,18 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // 如果../wei-ui-vue文件件存在，则打包wei-ui-vue
-    if !Path::new("../wei-ui-vue/dist").exists() {
+    if Path::new("../wei-ui-vue").exists() {
         let mut cmd = std::process::Command::new("git");
         cmd.arg("pull");
         cmd.current_dir("../wei-ui-vue");
         cmd.output().unwrap();
 
         let mut cmd = std::process::Command::new("C:/Program Files (x86)/Yarn/bin/yarn.cmd");
-        cmd.arg("run");
+        cmd.arg("install");
+        cmd.current_dir("../wei-ui-vue");
+        cmd.output().unwrap();
+
+        let mut cmd = std::process::Command::new("C:/Program Files (x86)/Yarn/bin/yarn.cmd");
         cmd.arg("build");
         cmd.current_dir("../wei-ui-vue");
         cmd.output().unwrap();
@@ -229,39 +232,39 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}Webview2.exe", release_data_path.clone())
     ).expect("Failed to copy files");    
 
-    std::fs::copy(
-        format!("{}daemon.dat", config_path),
-        format!("{}daemon.dat", release_data_path.clone())
-    ).expect("Failed to copy files");
+    // std::fs::copy(
+    //     format!("{}daemon.dat", config_path),
+    //     format!("{}daemon.dat", release_data_path.clone())
+    // ).expect("Failed to copy files");
 
-    std::fs::copy(
-        format!("{}download.dat", config_path),
-        format!("{}download.dat", release_data_path.clone())
-    ).expect("Failed to copy files");
+    // std::fs::copy(
+    //     format!("{}download.dat", config_path),
+    //     format!("{}download.dat", release_data_path.clone())
+    // ).expect("Failed to copy files");
 
-    std::fs::copy(
-        format!("{}product.dat", config_path),
-        format!("{}product.dat", release_data_path.clone())
-    ).expect("Failed to copy files");
+    // std::fs::copy(
+    //     format!("{}product.dat", config_path),
+    //     format!("{}product.dat", release_data_path.clone())
+    // ).expect("Failed to copy files");
 
-    std::fs::copy(
-        format!("{}build.dat", config_path),
-        format!("{}build.dat", release_data_path.clone())
-    ).expect("Failed to copy files");
+    // std::fs::copy(
+    //     format!("{}build.dat", config_path),
+    //     format!("{}build.dat", release_data_path.clone())
+    // ).expect("Failed to copy files");
 
-    std::fs::copy(
-        format!("{}kill.dat", config_path),
-        format!("{}kill.dat", release_data_path.clone())
+    // std::fs::copy(
+    //     format!("{}kill.dat", config_path),
+    //     format!("{}kill.dat", release_data_path.clone())
+    // ).expect("Failed to copy files");
+
+    copy_files(
+        config_path,
+        format!("{}", release_data_path.clone())
     ).expect("Failed to copy files");
 
     copy_files(
         format!("../wei-release/{}/qbittorrent", os),
         format!("{}qbittorrent", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    copy_files(
-        format!("{}dist", release_data_path.clone()),
-        format!("../wei-ui/dist")
     ).expect("Failed to copy files");
 
     let checksum_dir = std::path::PathBuf::from(release_path.clone());
