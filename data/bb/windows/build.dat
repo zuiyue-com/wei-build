@@ -1,7 +1,0 @@
-wei: wei
-wei-updater: data/wei-updater
-wei-qbittorrent: data/wei-qbittorrent
-
-wei-task: data/wei-task
-wei-sd: data/wei-sd
-wei-docker: data/wei-docker

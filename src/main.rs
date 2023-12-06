@@ -296,8 +296,9 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
     
-    git_command(&["git", "commit", "-am", version]);
-    git_command(&["git", "push"]);
+    git_command(&["add", "*"]);
+    git_command(&["commit", "-am", version]);
+    git_command(&["push"]);
 
     Ok(())
 }
