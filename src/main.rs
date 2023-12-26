@@ -203,6 +203,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");
 
     std::fs::copy(
+        format!("../wei/res/bear.ico"),
+        format!("{}bear.ico", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    std::fs::copy(
         format!("../wei/res/wei.png"),
         format!("{}wei.png", release_data_path.clone())
     ).expect("Failed to copy files");
@@ -265,6 +270,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     copy_files(
         format!("../wei-release/{}/qbittorrent", os),
         format!("{}qbittorrent", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    copy_files(
+        format!("../wei-release/{}/aria2", os),
+        format!("{}aria2", release_data_path.clone())
     ).expect("Failed to copy files");
 
     let checksum_dir = std::path::PathBuf::from(release_path.clone());
