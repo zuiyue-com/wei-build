@@ -1,6 +1,5 @@
 wei: wei
 wei-updater: data/wei-updater
-wei-qbittorrent: data/wei-qbittorrent
 wei-download: data/wei-download
 wei-ui: data/wei-ui
 

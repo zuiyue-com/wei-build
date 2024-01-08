@@ -267,10 +267,10 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    copy_files(
-        format!("../wei-release/{}/qbittorrent", os),
-        format!("{}qbittorrent", release_data_path.clone())
-    ).expect("Failed to copy files");
+    // copy_files(
+    //     format!("../wei-release/{}/qbittorrent", os),
+    //     format!("{}qbittorrent", release_data_path.clone())
+    // ).expect("Failed to copy files");
 
     copy_files(
         format!("../wei-release/{}/aria2", os),
