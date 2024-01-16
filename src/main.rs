@@ -285,7 +285,10 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let to = format!("../wei-release/{}/{}/latest", product_name, os);
     fs::create_dir_all(to.clone())?;
     fs::remove_dir_all(to.clone())?;
-    copy_files(from, to).expect("Failed to copy files");
+    copy_files(from.clone(), to).expect("Failed to copy files");
+
+    wei_file::xz_compress(&from)?;
+    let release_tar_xz = format!("{}.tar.xz", release_path.clone());
 
     // make torrent
     let mut cmd = std::process::Command::new("../wei-release/windows/transmission/transmission-create");
@@ -297,7 +300,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     });
     cmd.arg("-s");
     cmd.arg("8192");
-    cmd.arg(release_path.clone());
+    cmd.arg(release_tar_xz.clone());
     cmd.arg("-c");
     cmd.arg(version);
     cmd.current_dir("../wei-release");

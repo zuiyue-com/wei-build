@@ -9,6 +9,7 @@ homepage = "https://github.com/zuiyue-com/wei-build"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+wei-file = "0.1"
 serde_yaml = "0.9"
 toml = "0.7"
 sha2 = "0.10.7"
