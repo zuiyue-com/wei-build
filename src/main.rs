@@ -288,7 +288,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     copy_files(from.clone(), to).expect("Failed to copy files");
 
     wei_file::xz_compress(&from)?;
-    let release_tar_xz = format!("{}.tar.xz", release_path.clone());
+    println!("xz_compress: {}", from);
+    // 删除最后的 /
+    let release_tar_xz = format!("{}.tar.xz", release_path.clone().trim_end_matches('/'));
+
+    println!("release_tar_xz: {}", release_tar_xz);
 
     // make torrent
     let mut cmd = std::process::Command::new("../wei-release/windows/transmission/transmission-create");
