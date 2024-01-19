@@ -292,6 +292,8 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     // 删除最后的 /
     let release_tar_xz = format!("{}.tar.xz", release_path.clone().trim_end_matches('/'));
 
+    fs::remove_dir_all(release_path.clone())?;
+
     println!("release_tar_xz: {}", release_tar_xz);
 
     // make torrent
@@ -303,7 +305,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         cmd.arg(tracker.trim());
     });
     cmd.arg("-s");
-    cmd.arg("8192");
+    cmd.arg("512");
     cmd.arg(release_tar_xz.clone());
     cmd.arg("-c");
     cmd.arg(version);
