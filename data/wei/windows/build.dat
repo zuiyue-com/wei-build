@@ -3,6 +3,7 @@ wei-updater: data/wei-updater
 wei-download: data/wei-download
 wei-ui: data/wei-ui
 wei-hardware: data/wei-hardware
+wei-forward: data/wei-forward
 wei-task: data/wei-task
 wei-sd: data/wei-sd
 wei-docker: data/wei-docker
