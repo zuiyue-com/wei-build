@@ -3,5 +3,4 @@ wei-ui: 1
 wei-download: 1
 wei-hardware: 1
 wei-forward: 1
-wei-wsl: 1
 aria2c: 1

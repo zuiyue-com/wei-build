@@ -7,4 +7,3 @@ wei-forward: data/wei-forward
 wei-task: data/wei-task
 wei-sd: data/wei-sd
 wei-docker: data/wei-docker
-wei-wsl: data/wei-wsl
