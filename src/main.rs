@@ -282,10 +282,10 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     write_checksums(&checksum_dir, &mut checksum_file, &checksum_dir).expect("Failed to write checksums");
 
     let from = release_path.clone();
-    let to = format!("../wei-release/{}/{}/latest", product_name, os);
-    fs::create_dir_all(to.clone())?;
-    fs::remove_dir_all(to.clone())?;
-    copy_files(from.clone(), to).expect("Failed to copy files");
+    // let to = format!("../wei-release/{}/{}/latest", product_name, os);
+    // fs::create_dir_all(to.clone())?;
+    // fs::remove_dir_all(to.clone())?;
+    // copy_files(from.clone(), to).expect("Failed to copy files");
 
     wei_file::xz_compress(&from)?;
     println!("xz_compress: {}", from);
