@@ -1,2 +1,1 @@
 0 0 22 * * * wsl --update
-* 1/60 * * * * wei-forward start

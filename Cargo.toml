@@ -10,6 +10,7 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 wei-file = "0.1"
+wei-run = { path = "../wei-run" }
 serde_yaml = "0.9"
 toml = "0.7"
 sha2 = "0.10.7"

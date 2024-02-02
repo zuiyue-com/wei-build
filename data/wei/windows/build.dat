@@ -1,4 +1,5 @@
 wei: wei
+wei-server: data/wei-server
 wei-updater: data/wei-updater
 wei-download: data/wei-download
 wei-ui: data/wei-ui

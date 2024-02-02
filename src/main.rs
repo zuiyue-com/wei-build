@@ -287,6 +287,12 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     // fs::remove_dir_all(to.clone())?;
     // copy_files(from.clone(), to).expect("Failed to copy files");
 
+    // 签名
+    let sign_path = format!("{}wei.exe", release_path.clone());
+    sign(&sign_path)?;
+    let sign_path = format!("{}data/*.*", release_path.clone());
+    sign(&sign_path)?;
+
     wei_file::xz_compress(&from)?;
     println!("xz_compress: {}", from);
     // 删除最后的 /
@@ -403,6 +409,30 @@ fn write_checksums<P: AsRef<Path>>(dir: P
             write_checksums(&path, checksum_file, prefix)?;
         }
     }
+
+    Ok(())
+}
+
+fn sign(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let data = vec![
+        "sign", 
+        "/v", 
+        "/fd", 
+        "sha256",
+        "/sha1",
+        "5af5dd15d5416da3c188ad66b86ae89344946b6d",
+        "/tr",
+        "http://timestamp.globalsign.com/tsa/r6advanced1",
+        "/td", 
+        "sha256", 
+        path
+    ];
+    
+    // 获取取当前目录
+    let current_dir = std::env::current_dir()?;
+    let command = current_dir.join("signtool.exe");
+
+    wei_run::command(&command.display().to_string(), data)?;
 
     Ok(())
 }
