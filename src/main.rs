@@ -28,6 +28,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             test(&product_name).await?;
         }
+        "checkout" => {
+            checkout(&args[2], &args[3])?;
+        }
         "clear" => {
             git_clear();
         }
@@ -84,6 +87,46 @@ async fn test(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             }
             if !output.stderr.is_empty() {
                 println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+// 通过version来还原指定版本
+fn checkout(product_name: &str, version: &str) -> Result<(), Box<dyn std::error::Error>> {    
+    let os = match std::env::consts::OS {
+        "windows" => "windows",
+        "macos" => "macos",
+        "linux" => "ubuntu",
+        _ => "ubuntu"
+    };
+
+    let config_path = format!("./data/{}/{}/", product_name, os);
+    let path = Path::new(&config_path);
+    if !path.exists() {
+        println!("配置文件不存在，需要创建./data/{}/{}，具体配置请参考README.md", product_name, os);
+        return Ok(());
+    } 
+
+    let build_path = format!("{}build.dat", config_path);
+    let content = std::fs::read_to_string(&build_path)?;
+    let map: serde_yaml::Value = serde_yaml::from_str(&content)?;
+
+    if let serde_yaml::Value::Mapping(m) = map.clone() {
+        for (k, _) in m {
+            let name = k.as_str().unwrap();
+            println!("checkout: {} -> {}", name, version);
+                                   
+            let mut cmd = std::process::Command::new("git");
+            cmd.arg("checkout");
+            cmd.arg(version);
+            cmd.current_dir(format!("../{}", name));
+
+            if !cmd.output().unwrap().status.success() {
+                println!("checkout error!");
+                return Ok(());
             }
         }
     }
@@ -163,12 +206,27 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             cmd.arg("build");
             cmd.arg("--release");
             cmd.current_dir(format!("../{}", name));
-            cmd.output().unwrap();
 
-            if !cmd.status().unwrap().success() {
+            if !cmd.output().unwrap().status.success() {
                 println!("build error!");
                 return Ok(());
             }
+
+            let mut cmd = std::process::Command::new("git");
+            cmd.arg("tag");
+            cmd.arg("-a");
+            cmd.arg(version);
+            cmd.arg("-m");
+            cmd.arg(version);
+            cmd.current_dir(format!("../{}", name));
+            cmd.output().unwrap();
+
+            let mut cmd = std::process::Command::new("git");
+            cmd.arg("push");
+            cmd.arg("origin");
+            cmd.arg(version);
+            cmd.current_dir(format!("../{}", name));
+            cmd.output().unwrap();
 
             let src = format!("../{}/target/release/{}{}", name, name, suffix);
             println!("copy: {} -> {}", src, dest_file);
@@ -237,40 +295,10 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}Webview2.exe", release_data_path.clone())
     ).expect("Failed to copy files");    
 
-    // std::fs::copy(
-    //     format!("{}daemon.dat", config_path),
-    //     format!("{}daemon.dat", release_data_path.clone())
-    // ).expect("Failed to copy files");
-
-    // std::fs::copy(
-    //     format!("{}download.dat", config_path),
-    //     format!("{}download.dat", release_data_path.clone())
-    // ).expect("Failed to copy files");
-
-    // std::fs::copy(
-    //     format!("{}product.dat", config_path),
-    //     format!("{}product.dat", release_data_path.clone())
-    // ).expect("Failed to copy files");
-
-    // std::fs::copy(
-    //     format!("{}build.dat", config_path),
-    //     format!("{}build.dat", release_data_path.clone())
-    // ).expect("Failed to copy files");
-
-    // std::fs::copy(
-    //     format!("{}kill.dat", config_path),
-    //     format!("{}kill.dat", release_data_path.clone())
-    // ).expect("Failed to copy files");
-
     copy_files(
         config_path,
         format!("{}", release_data_path.clone())
     ).expect("Failed to copy files");
-
-    // copy_files(
-    //     format!("../wei-release/{}/qbittorrent", os),
-    //     format!("{}qbittorrent", release_data_path.clone())
-    // ).expect("Failed to copy files");
 
     copy_files(
         format!("../wei-release/{}/aria2", os),
