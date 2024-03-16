@@ -154,7 +154,6 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     let config_path = format!("./data/{}/{}/", product_name, os);
     let path = Path::new(&config_path);
-    // println!("{:?},{}", path,path.exists());
     if !path.exists() {
         println!("配置文件不存在，需要创建./data/{}/{}，具体配置请参考README.md", product_name, os);
         return Ok(());
@@ -234,18 +233,23 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    #[cfg(target_os = "windows")]
     if Path::new("../wei-ui-vue").exists() {
         let mut cmd = std::process::Command::new("git");
         cmd.arg("pull");
         cmd.current_dir("../wei-ui-vue");
         cmd.output().unwrap();
 
-        let mut cmd = std::process::Command::new("C:/Program Files (x86)/Yarn/bin/yarn.cmd");
+        // let yarn = "yarn";
+        let yarn = "C:/Program Files (x86)/Yarn/bin/yarn.cmd";
+
+
+        let mut cmd = std::process::Command::new(yarn);
         cmd.arg("install");
         cmd.current_dir("../wei-ui-vue");
         cmd.output().unwrap();
 
-        let mut cmd = std::process::Command::new("C:/Program Files (x86)/Yarn/bin/yarn.cmd");
+        let mut cmd = std::process::Command::new(yarn);
         cmd.arg("build");
         cmd.current_dir("../wei-ui-vue");
         cmd.output().unwrap();
@@ -300,6 +304,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}", release_data_path.clone())
     ).expect("Failed to copy files");
 
+    #[cfg(target_os = "windows")]
     copy_files(
         format!("../wei-release/{}/aria2", os),
         format!("{}aria2", release_data_path.clone())
@@ -316,10 +321,12 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     // copy_files(from.clone(), to).expect("Failed to copy files");
 
     // 签名
-    let sign_path = format!("{}wei.exe", release_path.clone());
-    sign(&sign_path)?;
-    let sign_path = format!("{}data/*.*", release_path.clone());
-    sign(&sign_path)?;
+    #[cfg(target_os = "windows")] {
+        let sign_path = format!("{}wei.exe", release_path.clone());
+        sign(&sign_path)?;
+        let sign_path = format!("{}data/*.*", release_path.clone());
+        sign(&sign_path)?;
+    }
 
     wei_file::xz_compress(&from)?;
     println!("xz_compress: {}", from);
@@ -331,7 +338,12 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("release_tar_xz: {}", release_tar_xz);
 
     // make torrent
-    let mut cmd = std::process::Command::new("../wei-release/windows/transmission/transmission-create");
+    #[cfg(target_os = "windows")]
+    let transmission = "../wei-release/windows/transmission/transmission-create";
+    #[cfg(not(target_os = "windows"))]
+    let transmission = "../wei-release/ubuntu/transmission/transmission-create";
+
+    let mut cmd = std::process::Command::new(transmission);
     cmd.arg("-o");
     cmd.arg(format!("../wei-release/{}/{}/{}.torrent", product_name, os, version));
     trackers.lines().filter(|line| !line.trim().is_empty()).for_each(|tracker| {
@@ -441,6 +453,7 @@ fn write_checksums<P: AsRef<Path>>(dir: P
     Ok(())
 }
 
+#[cfg(target_os = "windows")]
 fn sign(path: &str) -> Result<(), Box<dyn std::error::Error>> {
     let data = vec![
         "sign", 

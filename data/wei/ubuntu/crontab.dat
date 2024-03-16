@@ -1,0 +1,3 @@
+0 0 22 * * * wsl --update
+1/60 * * * * * wei-forward manager
+1/60 * * * * * wei-docker link
