@@ -297,14 +297,18 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::copy(
         format!("../wei-ui/Webview2.exe"),
         format!("{}Webview2.exe", release_data_path.clone())
-    ).expect("Failed to copy files");    
+    ).expect("Failed to copy files");
+
+    std::fs::copy(
+        format!("../wei-release/ubuntu/frp/frpc"),
+        format!("{}frpc", release_data_path.clone())
+    ).expect("Failed to copy files");   
 
     copy_files(
         config_path,
         format!("{}", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    #[cfg(target_os = "windows")]
     copy_files(
         format!("../wei-release/{}/aria2", os),
         format!("{}aria2", release_data_path.clone())
