@@ -201,10 +201,21 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             
-            let mut cmd = std::process::Command::new("cargo");
-            cmd.arg("build");
-            cmd.arg("--release");
-            cmd.current_dir(format!("../{}", name));
+            #[cfg(target_os = "windows")] {
+                let mut cmd = std::process::Command::new("cargo");
+                cmd.arg("build");
+                cmd.arg("--release");
+                cmd.current_dir(format!("../{}", name));
+            }
+
+            #[cfg(not(target_os = "windows"))] {
+                let mut cmd = std::process::Command::new("cargo");
+                cmd.arg("build");
+                cmd.arg("--release");
+                cmd.arg("--target=x86_64-unknown-linux-musl");
+                cmd.env("OPENSSL_DIR", "/usr/local/musl/");
+                cmd.current_dir(format!("../{}", name));
+            }
 
             if !cmd.output().unwrap().status.success() {
                 println!("build error!");
@@ -227,7 +238,12 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             cmd.current_dir(format!("../{}", name));
             cmd.output().unwrap();
 
+            #[cfg(target_os = "windows")]
             let src = format!("../{}/target/release/{}{}", name, name, suffix);
+
+            #[cfg(not(target_os = "windows"))]
+            let src = format!("../{}/target/x86_64-unknown-linux-musl/release/{}{}", name, name, suffix);
+            
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
         }
@@ -292,6 +308,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::copy(
         format!("../wei-updater/wei-updater.ps1"),
         format!("{}wei-updater.ps1", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    std::fs::copy(
+        format!("../wei-updater/wei-updater.sh"),
+        format!("{}wei-updater.sh", release_data_path.clone())
     ).expect("Failed to copy files");
 
     std::fs::copy(
