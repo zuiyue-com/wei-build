@@ -201,21 +201,22 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             
-            #[cfg(target_os = "windows")] {
-                let mut cmd = std::process::Command::new("cargo");
+            let mut cmd = std::process::Command::new("cargo");
+            // #[cfg(target_os = "windows")] {
                 cmd.arg("build");
                 cmd.arg("--release");
                 cmd.current_dir(format!("../{}", name));
-            }
+            // }
 
-            #[cfg(not(target_os = "windows"))] {
-                let mut cmd = std::process::Command::new("cargo");
-                cmd.arg("build");
-                cmd.arg("--release");
-                cmd.arg("--target=x86_64-unknown-linux-musl");
-                cmd.env("OPENSSL_DIR", "/usr/local/musl/");
-                cmd.current_dir(format!("../{}", name));
-            }
+            // #[cfg(not(target_os = "windows"))] {
+            //     cmd.arg("build");
+            //     cmd.arg("--release");
+            //     cmd.arg("--target=x86_64-unknown-linux-musl");
+            //     cmd.env("OPENSSL_DIR", "/usr/local/musl/");
+            //     cmd.current_dir(format!("../{}", name));
+            // }
+
+            // println!("{:?}", cmd);
 
             if !cmd.output().unwrap().status.success() {
                 println!("build error!");
@@ -238,11 +239,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
             cmd.current_dir(format!("../{}", name));
             cmd.output().unwrap();
 
-            #[cfg(target_os = "windows")]
+            // #[cfg(target_os = "windows")]
             let src = format!("../{}/target/release/{}{}", name, name, suffix);
 
-            #[cfg(not(target_os = "windows"))]
-            let src = format!("../{}/target/x86_64-unknown-linux-musl/release/{}{}", name, name, suffix);
+            // #[cfg(not(target_os = "windows"))]
+            // let src = format!("../{}/target/x86_64-unknown-linux-musl/release/{}{}", name, name, suffix);
             
             println!("copy: {} -> {}", src, dest_file);
             fs::copy(src, &dest_file).unwrap();
@@ -331,6 +332,11 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");
 
     copy_files(
+        format!("../wei-release/ubuntu/aria2-lib"),
+        format!("{}", release_data_path.clone())
+    ).expect("Failed to copy files");
+
+    copy_files(
         format!("../wei-release/{}/aria2", os),
         format!("{}aria2", release_data_path.clone())
     ).expect("Failed to copy files");
@@ -341,7 +347,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to copy files");   
 
     copy_files(
-        format!("../wei-dfdaemon/dfget_config", os),
+        format!("../wei-dfdaemon/dfget_config"),
         format!("{}dfget_config", release_data_path.clone())
     ).expect("Failed to copy files");
 
