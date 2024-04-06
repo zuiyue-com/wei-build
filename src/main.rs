@@ -335,6 +335,16 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}aria2", release_data_path.clone())
     ).expect("Failed to copy files");
 
+    std::fs::copy(
+        format!("../wei-dfdaemon/dfget"),
+        format!("{}dfget", release_data_path.clone())
+    ).expect("Failed to copy files");   
+
+    copy_files(
+        format!("../wei-dfdaemon/dfget_config", os),
+        format!("{}dfget_config", release_data_path.clone())
+    ).expect("Failed to copy files");
+
     let checksum_dir = std::path::PathBuf::from(release_path.clone());
     let mut checksum_file = File::create(format!("{}checksum.dat", release_data_path.clone()))?;
     write_checksums(&checksum_dir, &mut checksum_file, &checksum_dir).expect("Failed to write checksums");
