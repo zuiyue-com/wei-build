@@ -201,12 +201,9 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             
-            let mut cmd = std::process::Command::new("cargo");
-            // #[cfg(target_os = "windows")] {
-                cmd.arg("build");
-                cmd.arg("--release");
-                cmd.current_dir(format!("../{}", name));
-            // }
+            let mut cmd = std::process::Command::new("sh");
+            cmd.arg("-c");
+            cmd.arg(format!("cd ../{} && cargo build --release", name));
 
             // #[cfg(not(target_os = "windows"))] {
             //     cmd.arg("build");
@@ -223,21 +220,21 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
 
-            let mut cmd = std::process::Command::new("git");
-            cmd.arg("tag");
-            cmd.arg("-a");
-            cmd.arg(version);
-            cmd.arg("-m");
-            cmd.arg(version);
-            cmd.current_dir(format!("../{}", name));
-            cmd.output().unwrap();
+            // let mut cmd = std::process::Command::new("git");
+            // cmd.arg("tag");
+            // cmd.arg("-a");
+            // cmd.arg(version);
+            // cmd.arg("-m");
+            // cmd.arg(version);
+            // cmd.current_dir(format!("../{}", name));
+            // cmd.output().unwrap();
 
-            let mut cmd = std::process::Command::new("git");
-            cmd.arg("push");
-            cmd.arg("origin");
-            cmd.arg(version);
-            cmd.current_dir(format!("../{}", name));
-            cmd.output().unwrap();
+            // let mut cmd = std::process::Command::new("git");
+            // cmd.arg("push");
+            // cmd.arg("origin");
+            // cmd.arg(version);
+            // cmd.current_dir(format!("../{}", name));
+            // cmd.output().unwrap();
 
             // #[cfg(target_os = "windows")]
             let src = format!("../{}/target/release/{}{}", name, name, suffix);
