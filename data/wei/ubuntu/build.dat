@@ -12,3 +12,4 @@ wei-scheduler: data/wei-scheduler
 wei-dfdaemon: data/wei-dfdaemon
 wei-coin: data/wei-coin
 wei-shell: data/wei-shell
+wei-network: data/wei-network
