@@ -201,24 +201,26 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 continue;
             }
             
-            let mut cmd = std::process::Command::new("sh");
-            cmd.arg("-c");
-            cmd.arg(format!("cd ../{} && cargo build --release", name));
-
-            // #[cfg(not(target_os = "windows"))] {
-            //     cmd.arg("build");
-            //     cmd.arg("--release");
-            //     cmd.arg("--target=x86_64-unknown-linux-musl");
-            //     cmd.env("OPENSSL_DIR", "/usr/local/musl/");
-            //     cmd.current_dir(format!("../{}", name));
-            // }
-
-            // println!("{:?}", cmd);
-
-            if !cmd.output().unwrap().status.success() {
-                println!("build error!");
-                return Ok(());
+            #[cfg(not(target_os = "windows"))] {
+                let mut cmd = std::process::Command::new("sh");
+                cmd.arg("-c");
+                cmd.arg(format!("cd ../{} && cargo build --release", name));
+                if !cmd.output().unwrap().status.success() {
+                    println!("build error!");
+                    return Ok(());
+                }
             }
+            #[cfg(target_os = "windows")] {
+                let mut cmd = std::process::Command::new("cmd");
+                cmd.arg("/c");
+                cmd.arg(format!("cd../{} && cargo build --release", name));
+                if !cmd.output().unwrap().status.success() {
+                    println!("build error!");
+                    return Ok(());
+                }
+            }
+
+
 
             // let mut cmd = std::process::Command::new("git");
             // cmd.arg("tag");
