@@ -214,7 +214,38 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
                 let mut cmd = std::process::Command::new("cmd");
                 cmd.arg("/c");
                 cmd.arg(format!("cd../{} && cargo build --release", name));
-                if !cmd.output().unwrap().status.success() {
+                cmd.stdout(std::process::Stdio::piped());
+                cmd.stderr(std::process::Stdio::piped());
+                
+                let mut child = cmd.spawn().unwrap();
+                let stdout = child.stdout.take().unwrap();
+                let stderr = child.stderr.take().unwrap();
+                
+                let stdout_thread = std::thread::spawn(move || {
+                    use std::io::{BufRead, BufReader};
+                    let reader = BufReader::new(stdout);
+                    for line in reader.lines() {
+                        if let Ok(line) = line {
+                            println!("{}", line);
+                        }
+                    }
+                });
+
+                let stderr_thread = std::thread::spawn(move || {
+                    use std::io::{BufRead, BufReader};
+                    let reader = BufReader::new(stderr);
+                    for line in reader.lines() {
+                        if let Ok(line) = line {
+                            eprintln!("{}", line);
+                        }
+                    }
+                });
+
+                let status = child.wait().unwrap();
+                stdout_thread.join().unwrap();
+                stderr_thread.join().unwrap();
+
+                if !status.success() {
                     println!("build error!");
                     return Ok(());
                 }
