@@ -303,8 +303,13 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let src = "../wei-ui-vue/dist";
-    let dest_file = format!("{}dist", release_data_path.clone());
-    copy_files(src, &dest_file).expect("Failed to copy files");
+    let src_path = Path::new(src);
+    if src_path.exists() {
+        let dest_file = format!("{}{}", release_data_path.clone(), "dist");
+        copy_files(src, &dest_file).expect("Failed to copy files");
+    } else {
+        println!("Skipping wei-ui-vue files copy as source directory does not exist");
+    }
     
     std::fs::copy(
         format!("../wei/res/wei.ico"),
@@ -386,16 +391,20 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     // fs::remove_dir_all(to.clone())?;
     // copy_files(from.clone(), to).expect("Failed to copy files");
 
+    // println!("sign_path");
     // 签名
     #[cfg(target_os = "windows")] {
-        let sign_path = format!("{}wei.exe", release_path.clone());
-        sign(&sign_path)?;
-        let sign_path = format!("{}data/*.*", release_path.clone());
-        sign(&sign_path)?;
+        // let sign_path = format!("{}wei.exe", release_path.clone());
+        // sign(&sign_path)?;
+        // let sign_path = format!("{}data/*.*", release_path.clone());
+        // sign(&sign_path)?;
     }
 
-    wei_file::xz_compress(&from)?;
-    println!("xz_compress: {}", from);
+    // 如何不存在wsl命令行则不执行下面的操作
+    #[cfg(target_os = "windows")] {
+        
+    }
+
     // 删除最后的 /
     let release_tar_xz = format!("{}.tar.xz", release_path.clone().trim_end_matches('/'));
 
@@ -409,6 +418,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(not(target_os = "windows"))]
     let transmission = "../wei-release/ubuntu/transmission/transmission-create";
 
+    println!("make torrent: {}", transmission);
     let mut cmd = std::process::Command::new(transmission);
     cmd.arg("-o");
     cmd.arg(format!("../wei-release/{}/{}/{}.torrent", product_name, os, version));
@@ -422,6 +432,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("-c");
     cmd.arg(version);
     cmd.current_dir("../wei-release");
+    println!("make torrent cmd");
     let output = cmd.output().unwrap();
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
