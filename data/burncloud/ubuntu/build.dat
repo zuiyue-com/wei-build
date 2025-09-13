@@ -1,0 +1,14 @@
+wei: wei
+wei-daemon: data/wei-daemon
+wei-server: data/wei-server
+wei-updater: data/wei-updater
+wei-download: data/wei-download
+wei-hardware: data/wei-hardware
+wei-forward: data/wei-forward
+wei-task: data/wei-task
+wei-docker: data/wei-docker
+wei-docker-linux: data/wei-docker-linux
+wei-scheduler: data/wei-scheduler
+wei-dfdaemon: data/wei-dfdaemon
+wei-shell: data/wei-shell
+wei-network: data/wei-network

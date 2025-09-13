@@ -280,11 +280,17 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    // Determine UI directory based on product name
+    let ui_dir = match product_name {
+        "burncloud" => "../burncloud",
+        _ => "../wei-ui-vue"
+    };
+
     #[cfg(target_os = "windows")]
-    if Path::new("../wei-ui-vue").exists() {
+    if Path::new(ui_dir).exists() {
         let mut cmd = std::process::Command::new("git");
         cmd.arg("pull");
-        cmd.current_dir("../wei-ui-vue");
+        cmd.current_dir(ui_dir);
         cmd.output().unwrap();
 
         // let yarn = "yarn";
@@ -293,22 +299,22 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
         let mut cmd = std::process::Command::new(yarn);
         cmd.arg("install");
-        cmd.current_dir("../wei-ui-vue");
+        cmd.current_dir(ui_dir);
         cmd.output().unwrap();
 
         let mut cmd = std::process::Command::new(yarn);
         cmd.arg("build");
-        cmd.current_dir("../wei-ui-vue");
+        cmd.current_dir(ui_dir);
         cmd.output().unwrap();
     }
 
-    let src = "../wei-ui-vue/dist";
-    let src_path = Path::new(src);
+    let src = format!("{}/dist", ui_dir);
+    let src_path = Path::new(&src);
     if src_path.exists() {
         let dest_file = format!("{}{}", release_data_path.clone(), "dist");
-        copy_files(src, &dest_file).expect("Failed to copy files");
+        copy_files(&src, &dest_file).expect("Failed to copy files");
     } else {
-        println!("Skipping wei-ui-vue files copy as source directory does not exist");
+        println!("Skipping {} files copy as source directory does not exist", ui_dir);
     }
     
     std::fs::copy(
