@@ -1,6 +1,7 @@
 
 use std::fs;
 use std::path::Path;
+use zip::{ZipWriter, write::FileOptions};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -280,41 +281,41 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Determine UI directory based on product name
-    let ui_dir = match product_name {
-        "burncloud" => "../burncloud",
-        _ => "../wei-ui-vue"
-    };
+    // Only process UI for non-burncloud products
+    if product_name != "burncloud" {
+        let ui_dir = "../wei-ui-vue";
 
-    #[cfg(target_os = "windows")]
-    if Path::new(ui_dir).exists() {
-        let mut cmd = std::process::Command::new("git");
-        cmd.arg("pull");
-        cmd.current_dir(ui_dir);
-        cmd.output().unwrap();
+        #[cfg(target_os = "windows")]
+        if Path::new(ui_dir).exists() {
+            let mut cmd = std::process::Command::new("git");
+            cmd.arg("pull");
+            cmd.current_dir(ui_dir);
+            cmd.output().unwrap();
 
-        // let yarn = "yarn";
-        let yarn = "C:/Program Files (x86)/Yarn/bin/yarn.cmd";
+            // let yarn = "yarn";
+            let yarn = "C:/Program Files (x86)/Yarn/bin/yarn.cmd";
 
+            let mut cmd = std::process::Command::new(yarn);
+            cmd.arg("install");
+            cmd.current_dir(ui_dir);
+            cmd.output().unwrap();
 
-        let mut cmd = std::process::Command::new(yarn);
-        cmd.arg("install");
-        cmd.current_dir(ui_dir);
-        cmd.output().unwrap();
+            let mut cmd = std::process::Command::new(yarn);
+            cmd.arg("build");
+            cmd.current_dir(ui_dir);
+            cmd.output().unwrap();
+        }
 
-        let mut cmd = std::process::Command::new(yarn);
-        cmd.arg("build");
-        cmd.current_dir(ui_dir);
-        cmd.output().unwrap();
-    }
-
-    let src = format!("{}/dist", ui_dir);
-    let src_path = Path::new(&src);
-    if src_path.exists() {
-        let dest_file = format!("{}{}", release_data_path.clone(), "dist");
-        copy_files(&src, &dest_file).expect("Failed to copy files");
+        let src = format!("{}/dist", ui_dir);
+        let src_path = Path::new(&src);
+        if src_path.exists() {
+            let dest_file = format!("{}{}", release_data_path.clone(), "dist");
+            copy_files(&src, &dest_file).expect("Failed to copy files");
+        } else {
+            println!("Skipping {} files copy as source directory does not exist", ui_dir);
+        }
     } else {
-        println!("Skipping {} files copy as source directory does not exist", ui_dir);
+        println!("Skipping UI processing for burncloud product");
     }
     
     std::fs::copy(
@@ -391,7 +392,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut checksum_file = File::create(format!("{}checksum.dat", release_data_path.clone()))?;
     write_checksums(&checksum_dir, &mut checksum_file, &checksum_dir).expect("Failed to write checksums");
 
-    let from = release_path.clone();
+    let _from = release_path.clone();
     // let to = format!("../wei-release/{}/{}/latest", product_name, os);
     // fs::create_dir_all(to.clone())?;
     // fs::remove_dir_all(to.clone())?;
@@ -412,11 +413,13 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 删除最后的 /
-    let release_tar_xz = format!("{}.tar.xz", release_path.clone().trim_end_matches('/'));
+    let release_zip = format!("{}.zip", release_path.clone().trim_end_matches('/'));
 
+    // Create zip file
+    create_zip_archive(&release_path, &release_zip)?;
     fs::remove_dir_all(release_path.clone())?;
 
-    println!("release_tar_xz: {}", release_tar_xz);
+    println!("release_zip: {}", release_zip);
 
     // make torrent
     #[cfg(target_os = "windows")]
@@ -434,7 +437,7 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     });
     cmd.arg("-s");
     cmd.arg("512");
-    cmd.arg(release_tar_xz.clone());
+    cmd.arg(release_zip.clone());
     cmd.arg("-c");
     cmd.arg(version);
     cmd.current_dir("../wei-release");
@@ -558,5 +561,48 @@ fn sign(path: &str) -> Result<(), Box<dyn std::error::Error>> {
 
     wei_run::command(&command.display().to_string(), data)?;
 
+    Ok(())
+}
+
+fn create_zip_archive<P: AsRef<Path>>(source_dir: P, zip_path: P) -> io::Result<()> {
+    let source_dir = source_dir.as_ref();
+    let zip_path = zip_path.as_ref();
+    
+    let file = File::create(zip_path)?;
+    let mut zip = ZipWriter::new(file);
+    let options = FileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated)
+        .unix_permissions(0o755);
+
+    add_dir_to_zip(&mut zip, source_dir, source_dir, &options)?;
+    zip.finish()?;
+    Ok(())
+}
+
+fn add_dir_to_zip<W: Write + std::io::Seek>(
+    zip: &mut ZipWriter<W>,
+    dir_path: &Path,
+    base_path: &Path,
+    options: &FileOptions,
+) -> io::Result<()> {
+    for entry in fs::read_dir(dir_path)? {
+        let entry = entry?;
+        let path = entry.path();
+        let relative_path = path.strip_prefix(base_path).unwrap();
+        
+        if path.is_file() {
+            zip.start_file(relative_path.to_string_lossy(), *options)?;
+            let mut file = File::open(&path)?;
+            let mut buffer = Vec::new();
+            file.read_to_end(&mut buffer)?;
+            zip.write_all(&buffer)?;
+        } else if path.is_dir() {
+            // Add directory entry
+            let dir_name = format!("{}/", relative_path.to_string_lossy());
+            zip.add_directory(dir_name, *options)?;
+            // Recursively add directory contents
+            add_dir_to_zip(zip, &path, base_path, options)?;
+        }
+    }
     Ok(())
 }

@@ -1,4 +1,5 @@
 wei: wei
+burncloud: data/burncloud
 wei-daemon: data/wei-daemon
 wei-server: data/wei-server
 wei-updater: data/wei-updater
