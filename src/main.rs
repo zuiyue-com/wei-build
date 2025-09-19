@@ -317,45 +317,12 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     } else {
         println!("Skipping UI processing for burncloud product");
     }
+
+    println!("{}", format!("./data/{}/{}/wei.ico", product_name, os));
     
     std::fs::copy(
-        format!("../wei/res/wei.ico"),
+        format!("./data/{}/{}/wei.ico", product_name, os),
         format!("{}wei.ico", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei/res/bear.ico"),
-        format!("{}bear.ico", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei/res/wei.png"),
-        format!("{}wei.png", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei-daemon/wei-daemon.ps1"),
-        format!("{}wei-daemon.ps1", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei-daemon/wei-daemon-close.ps1"),
-        format!("{}wei-daemon-close.ps1", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei-run/wei-close.ps1"),
-        format!("{}wei-close.ps1", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei-updater/wei-updater.ps1"),
-        format!("{}wei-updater.ps1", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei-updater/wei-updater.sh"),
-        format!("{}wei-updater.sh", release_data_path.clone())
     ).expect("Failed to copy files");
 
     std::fs::copy(
@@ -363,10 +330,10 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
         format!("{}Webview2.exe", release_data_path.clone())
     ).expect("Failed to copy files");
 
-    std::fs::copy(
-        format!("../wei-release/ubuntu/frp/frpc"),
-        format!("{}frpc", release_data_path.clone())
-    ).expect("Failed to copy files");   
+    // std::fs::copy(
+    //     format!("../wei-release/ubuntu/frp/frpc"),
+    //     format!("{}frpc", release_data_path.clone())
+    // ).expect("Failed to copy files");   
 
     copy_files(
         config_path,
@@ -376,16 +343,6 @@ async fn build(product_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     copy_files(
         format!("../wei-release/{}/aria2", os),
         format!("{}aria2", release_data_path.clone())
-    ).expect("Failed to copy files");
-
-    std::fs::copy(
-        format!("../wei-dfdaemon/dfget"),
-        format!("{}dfget", release_data_path.clone())
-    ).expect("Failed to copy files");   
-
-    copy_files(
-        format!("../wei-dfdaemon/dfget_config"),
-        format!("{}dfget_config", release_data_path.clone())
     ).expect("Failed to copy files");
 
     let checksum_dir = std::path::PathBuf::from(release_path.clone());
